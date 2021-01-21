@@ -26,7 +26,7 @@ You can use a pre-defnied build, define a build in `values.py` or define a custo
 
 # Example output
 ```
-upload ) python rate.py
+> python rate.py
 Enter rarity: 5
 
 Enter build (character name or 'custom'): albedo
