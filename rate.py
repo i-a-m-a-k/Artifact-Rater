@@ -1,3 +1,21 @@
+'''
+Artifact Rater for Genshin Impact
+Copyright (C) 2021  "i-a-m-a-k"
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as published
+by the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>.
+'''
+
 import sys
 from math import floor
 from bisect import bisect
@@ -5,14 +23,33 @@ from values import Mainstats as main, Substats as sub, CharBuilds
 
 ###################################  Defining variables  ###################################
 
-m_dict = {'hp' : main.hp, 'atk' : main.atk, 'hpp' : main.hpp,
-             'atkp' : main.atkp, 'defp' : main.defp, 'em' : main.em,
-             'er' : main.er, 'eled' : main.ele_dmg, 'phyd' : main.phy_dmg,
-             'crit' : main.crit, 'cdmg' : main.cdmg, 'heal' : main.heal}
+m_dict = {
+    'hp': main.hp,
+    'atk': main.atk,
+    'hpp': main.hpp,
+    'atkp': main.atkp,
+    'defp': main.defp,
+    'em': main.em,
+    'er': main.er,
+    'eled': main.ele_dmg,
+    'phyd': main.phy_dmg,
+    'crit': main.crit,
+    'cdmg': main.cdmg,
+    'heal': main.heal
+}
 
-s_dict = {'hp' : sub.hp, 'atk' : sub.atk, 'def' : sub.defn,
-            'hpp' : sub.hpp, 'atkp' : sub.atkp, 'defp' : sub.defp,
-            'em' : sub.em, 'er' : sub.er, 'crit' : sub.crit, 'cdmg' : sub.cdmg}
+s_dict = {
+    'hp': sub.hp,
+    'atk': sub.atk,
+    'def': sub.defn,
+    'hpp': sub.hpp,
+    'atkp': sub.atkp,
+    'defp': sub.defp,
+    'em': sub.em,
+    'er': sub.er,
+    'crit': sub.crit,
+    'cdmg': sub.cdmg
+}
 
 STAT_STR = '\x1b[1;35;40m' + 'Stat:\t' + '\x1b[0m'
 VAL_STR = '\x1b[1;34;40m' + 'Val:\t' + '\x1b[0m'
@@ -22,9 +59,10 @@ MAX_RATING = 3
 #builds, character builds need to be imported from library
 cust_stats = dict()
 #only albedo is present since only albedo is defined in 'values.py'
-builds = {'albedo':CharBuilds.albedo, 'custom':cust_stats}
+builds = {'albedo': CharBuilds.albedo, 'custom': cust_stats}
 
 ###################################  Defining functions  ###################################
+
 
 def main_stat(rarity, stat, val):
     """Calculates level of the artifact based on main stat."""
@@ -33,8 +71,7 @@ def main_stat(rarity, stat, val):
     arr = m_dict[stat]
     arr = arr[index]
 
-    return bisect(arr, val)-1
-
+    return bisect(arr, val) - 1
 
 
 def sub_stat(rarity, stat, val):
@@ -49,13 +86,12 @@ def sub_stat(rarity, stat, val):
         #ind will contain index of stat if it is added to arr and sorted
         ind = bisect(arr, val) - 1
         if ind == -1:
-            return level+1
+            return level + 1
 
         val -= arr[ind]
         level += 1
 
     return level
-
 
 
 def input_cust():
@@ -78,7 +114,6 @@ def input_cust():
         cust_stats.update({i.strip(): 1})
 
 
-
 def rate(m_stat, sub_dict, build, rarity):
     """Rates the artifact at L20 only."""
     if build == 'custom' and not bool(cust_stats):
@@ -92,7 +127,6 @@ def rate(m_stat, sub_dict, build, rarity):
         if i in arr.keys():
             quality += arr[i] * j
 
-
     #Main stat has more (8x) weightage than substats. Flower and Feather are exempt.
     count = 0
     for key in arr.keys():
@@ -100,54 +134,56 @@ def rate(m_stat, sub_dict, build, rarity):
             count += 1
 
     if count < 2:
-        divisor = 4*MAX_RATING + rarity*(MAX_RATING-1)
+        divisor = 4 * MAX_RATING + rarity * (MAX_RATING - 1)
 
     #since only 1 possible max rating sub
     elif count == 2 and m_stat in arr.keys() and \
          arr[m_stat] == MAX_RATING:
-        divisor = 4*MAX_RATING + rarity*(MAX_RATING-1)
+        divisor = 4 * MAX_RATING + rarity * (MAX_RATING - 1)
 
     #since neither eled, phyd or heal can be substats
     elif count == 2 and 'eled' in arr.keys() and \
          arr['eled'] == MAX_RATING and m_stat != 'eled':
-        divisor = 4*MAX_RATING + rarity*(MAX_RATING-1)
+        divisor = 4 * MAX_RATING + rarity * (MAX_RATING - 1)
 
     elif count == 2 and 'phyd' in arr.keys() and \
          arr['phyd'] == MAX_RATING and m_stat != 'phyd':
-        divisor = 4*MAX_RATING + rarity*(MAX_RATING-1)
+        divisor = 4 * MAX_RATING + rarity * (MAX_RATING - 1)
 
     elif count == 2 and 'heal' in arr.keys() and \
          arr['heal'] == MAX_RATING and m_stat != 'heal':
-        divisor = 4*MAX_RATING + rarity*(MAX_RATING-1)
+        divisor = 4 * MAX_RATING + rarity * (MAX_RATING - 1)
 
     else:
-        divisor = (4+rarity-1)*MAX_RATING
+        divisor = (4 + rarity - 1) * MAX_RATING
 
     #flower/feather
     if m_stat in ('atk', 'hp'):
-        return quality*100/divisor
+        return quality * 100 / divisor
 
-    quality += 32 * arr[m_stat] #32 = 8*4 (4 for max level of substat)
-    return quality*100/(divisor + 32 * arr[m_stat])
-
+    quality += 32 * arr[m_stat]  #32 = 8*4 (4 for max level of substat)
+    return quality * 100 / (divisor + 32 * arr[m_stat])
 
 
 def pred(rarity, m_stat, level, sub_dict, build):
     """Predicts all further rolls and then takes weighted mean based on the probability."""
-    if floor(level/4) == rarity:
+    if floor(level / 4) == rarity:
         rating = rate(m_stat, sub_dict, build, rarity)
         return rating
 
-    if floor(level/4) < rarity: #predicts possible stats and weighs them based on probability
-        rating  = 0
+    if floor(
+            level / 4
+    ) < rarity:  #predicts possible stats and weighs them based on probability
+        rating = 0
         temp_dict = sub_dict
 
         for i in temp_dict.keys():
             temp_dict[i] += 1
-            rating += pred(rarity, m_stat, level+4, temp_dict, build)*0.25
+            rating += pred(rarity, m_stat, level + 4, temp_dict, build) * 0.25
             temp_dict[i] -= 1
 
         return rating
+
 
 ###################################  Taking input  ###################################
 
@@ -161,8 +197,10 @@ if inp_build not in builds.keys():
 if inp_build == 'custom':
     input_cust()
 
-print('\nEnter main stat and value'
-      '(hp | atk | hpp | atkp | defp | em | er | phyd | eled | crit | cdmg | heal):')
+print(
+    '\nEnter main stat and value'
+    '(hp | atk | hpp | atkp | defp | em | er | phyd | eled | crit | cdmg | heal):'
+)
 m_stat = input(STAT_STR).lower()
 m_val = float(input(VAL_STR))
 
@@ -181,11 +219,12 @@ s_stat4 = input(STAT_STR).lower()
 s_val4 = float(input(VAL_STR))
 
 #inp_sub_dict will hold all the substats with their levels
-inp_sub_dict = { s_stat1 : sub_stat(inp_rarity, s_stat1, s_val1),
-             s_stat2 : sub_stat(inp_rarity, s_stat2, s_val2),
-             s_stat3 : sub_stat(inp_rarity, s_stat3, s_val3),
-             s_stat4 : sub_stat(inp_rarity, s_stat4, s_val4) }
-
+inp_sub_dict = {
+    s_stat1: sub_stat(inp_rarity, s_stat1, s_val1),
+    s_stat2: sub_stat(inp_rarity, s_stat2, s_val2),
+    s_stat3: sub_stat(inp_rarity, s_stat3, s_val3),
+    s_stat4: sub_stat(inp_rarity, s_stat4, s_val4)
+}
 
 ## Print the build and substat level.
 build_dict = builds[inp_build]
@@ -193,10 +232,9 @@ print('\nWeightage of substats:\t', build_dict)
 print('Levels of substats:\t', inp_sub_dict)
 ##
 
-
-out_rating = pred(inp_rarity,m_stat,
-              main_stat(inp_rarity, m_stat, m_val)*4,
-              inp_sub_dict, inp_build)
+out_rating = pred(inp_rarity, m_stat,
+                  main_stat(inp_rarity, m_stat, m_val) * 4, inp_sub_dict,
+                  inp_build)
 
 if out_rating > 66.7:
     RATING_STR = '\x1b[1;32;40m' + str(out_rating) + '\x1b[0m'
@@ -204,4 +242,4 @@ elif out_rating > 33.3:
     RATING_STR = '\x1b[1;33;40m' + str(out_rating) + '\x1b[0m'
 else:
     RATING_STR = '\x1b[1;31;40m' + str(out_rating) + '\x1b[0m'
-print('\nRating out of 100: ' ,RATING_STR)
+print('\nRating out of 100: ', RATING_STR)
