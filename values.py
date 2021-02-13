@@ -1,6 +1,6 @@
 '''
 Artifact Rater for Genshin Impact
-Copyright (C) 2021  "i-a-m-a-k"
+Copyright (C) 2021  "iamak21@protonmail.ch"
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published
